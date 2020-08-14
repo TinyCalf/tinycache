@@ -1,7 +1,6 @@
 package tinycache
 
-// PeerPicker is the interface that must be implemented to locate
-// the peer that owns a specific key.
+//PeerPicker 用于定位key所在的peer
 type PeerPicker interface {
 	PickPeer(key string) (peer PeerGetter, ok bool)
 }

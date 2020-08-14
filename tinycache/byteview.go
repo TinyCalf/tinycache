@@ -1,6 +1,8 @@
+//ByteView是缓存数据格式，可以考虑使用更丰富的数据结构取代
+
 package tinycache
 
-// A ByteView holds an immutable view of bytes.
+// ByteView 维护一份不可变的数据
 type ByteView struct {
 	b []byte
 }

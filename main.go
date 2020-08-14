@@ -21,9 +21,9 @@ import (
 var (
 	dbName = "scores"
 	dbData = map[string]string{
-	"Tom":  "630",
-	"Jack": "589",
-	"Sam":  "567",
+		"Tom":  "630",
+		"Jack": "589",
+		"Sam":  "567",
 	}
 )
 

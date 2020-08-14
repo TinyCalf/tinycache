@@ -1,3 +1,7 @@
+//核心的缓存容器
+//目前封装了lru，并做了线程安全处理
+//可以想办法支持其他淘汰策略或者过期策略
+
 package tinycache
 
 import (
@@ -27,7 +31,6 @@ func (c *cache) get(key string) (value ByteView, ok bool) {
 	if c.lru == nil {
 		return
 	}
-
 
 	if v, ok := c.lru.Get(key); ok {
 		return v.(ByteView), ok

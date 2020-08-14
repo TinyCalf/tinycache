@@ -68,11 +68,12 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Type", "application/text")
+	w.Header().Set("Content-Type", "application/octet-stream")
 
 	w.Write(view.ByteSlice())
 }
+
+var _ http.Handler = (*HTTPPool)(nil)
 
 // Set updates the pool's list of peers.
 func (p *HTTPPool) Set(peers ...string) {

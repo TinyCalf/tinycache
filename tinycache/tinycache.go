@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+//Getter is
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
@@ -13,6 +14,7 @@ type Getter interface {
 //GetterFunc 是用来获取数据源的可自定义函数
 type GetterFunc func(key string) ([]byte, error)
 
+//Get is
 func (f GetterFunc) Get(key string) ([]byte, error) {
 	return f(key)
 }
