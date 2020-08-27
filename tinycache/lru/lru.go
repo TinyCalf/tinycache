@@ -2,9 +2,14 @@ package lru
 
 import "container/list"
 
-//Value 使用Len来获取其大小
+//Value 是缓存的内容，使用Len来获取其大小
 type Value interface {
 	Len() int
+}
+
+type entry struct {
+	key   string
+	value Value
 }
 
 //Cache 是一个LRU缓存 不要直接构建它
@@ -34,11 +39,11 @@ func (c *Cache) Len() int {
 func (c *Cache) Set(key string, value Value) {
 	if ele, exists := c.cache[key]; exists {
 		c.ll.MoveToFront(ele)
-		obj := ele.Value.(*cacheObject)
+		obj := ele.Value.(*entry)
 		c.nBytes += int64(value.Len()) - int64(obj.value.Len())
 		obj.value = value
 	} else {
-		obj := &cacheObject{key, value}
+		obj := &entry{key, value}
 		ele := c.ll.PushFront(obj)
 		c.cache[key] = ele
 		c.nBytes += int64(len(key)) + int64(value.Len())
@@ -52,7 +57,7 @@ func (c *Cache) Set(key string, value Value) {
 func (c *Cache) Get(key string) (value Value, exists bool) {
 	if ele, exists := c.cache[key]; exists {
 		c.ll.MoveToFront(ele)
-		obj := ele.Value.(*cacheObject)
+		obj := ele.Value.(*entry)
 		return obj.value, true
 	}
 	return
@@ -61,13 +66,12 @@ func (c *Cache) Get(key string) (value Value, exists bool) {
 func (c *Cache) removeOldest() {
 	if ele := c.ll.Back(); ele != nil {
 		c.ll.Remove(ele)
-		obj := ele.Value.(*cacheObject)
+		obj := ele.Value.(*entry)
 		delete(c.cache, obj.key)
 		c.nBytes -= int64(len(obj.key)) + int64(obj.value.Len())
 	}
 }
 
-type cacheObject struct {
-	key   string
-	value Value
-}
+
+
+

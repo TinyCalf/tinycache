@@ -1,8 +1,6 @@
 package tinycache
 
 import (
-	"fmt"
-	"log"
 	"testing"
 )
 
@@ -15,29 +13,32 @@ var (
 	}
 )
 
-func createGroup() *Group {
-	var f GetterFunc = func(key string) ([]byte, error) {
-		log.Println("[SlowDB] search key", key)
-		if v, ok := dbData[key]; ok {
-			return []byte(v), nil
-		}
-		return nil, fmt.Errorf("%s not exist", key)
+//测试1 连续请求同一个key，一次从loader获取，一次从cache获取
+func TestGroupCase1(t *testing.T) {
+	var loader Loader = func(key string) (string, error) {
+		return dbData[key], nil
 	}
-	return NewGroup(dbName, 2<<10, f)
+	c := CreateCollection("score", 10, loader)
+	key := "Tom"
+	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader {
+		t.Fatalf("res: %s, loadType: %d",res, lt );
+	}
+	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalCache{
+		t.Fatalf("res: %s, loadType: %d",res, lt );
+	}
 }
 
-/**
-数据组测试1
-缓存为空时通过回调获取源数据
-有缓存时直接返回缓存
-*/
-func TestGroupCase1(t *testing.T) {
-	g := createGroup()
-	key := "Tom"
-	if res, _ := g.Get(key); res.String() != dbData[key] {
-		t.Fatalf("expect %s but get %s ", key, res)
+//测试2 缓存容量很低的时候 连续请求同一个key都是从loader获取
+func TestGroupCase2(t *testing.T) {
+	var loader Loader = func(key string) (string, error) {
+		return dbData[key], nil
 	}
-	if res, _ := g.Get(key); res.String() != dbData[key] {
-		t.Fatalf("expect %s but get %s ", key, res)
+	c := CreateCollection("score", 1, loader)
+	key := "Tom"
+	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader {
+		t.Fatalf("res: %s, loadType: %d",res, lt );
+	}
+	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader{
+		t.Fatalf("res: %s, loadType: %d",res, lt );
 	}
 }
