@@ -33,7 +33,7 @@ type Collection struct {
 }
 
 // CreateCollection 创建一个新的集合
-// cap用于指定该集合所占用的内存，超出内存部分会执行lru
+// cap 用于指定该集合所占用的内存，超出内存部分会执行lru
 func CreateCollection(name string, cap int64, loader Loader) *Collection {
 	c := &Collection{
 		name: name,
