@@ -14,7 +14,7 @@ var (
 )
 
 //测试1 连续请求同一个key，一次从loader获取，一次从cache获取
-func TestGroupCase1(t *testing.T) {
+func TestCase1(t *testing.T) {
 	var loader Loader = func(key string) (string, error) {
 		return dbData[key], nil
 	}
@@ -29,7 +29,7 @@ func TestGroupCase1(t *testing.T) {
 }
 
 //测试2 缓存容量很低的时候 连续请求同一个key都是从loader获取
-func TestGroupCase2(t *testing.T) {
+func TestCase2(t *testing.T) {
 	var loader Loader = func(key string) (string, error) {
 		return dbData[key], nil
 	}
