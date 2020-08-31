@@ -40,6 +40,14 @@ func (c *Collection) Get(key string) (string, error) {
 		return "", fmt.Errorf("key is required")
 	}
 
+	peer, isSelf := globalPeerManager.selectPeer(c.name + key);
+	if peer != nil && !isSelf  {
+		value, err := peer.get(c.name, key)
+		if err == nil {
+			return value, nil
+		}
+	}
+	
 	if v, ok := c.cache.get(key); ok {
 		return v, nil
 	}

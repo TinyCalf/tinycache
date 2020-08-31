@@ -1,18 +1,8 @@
 package main
 
-/*
-$ curl "http://localhost:9999/api?key=Tom"
-630
-$ curl "http://localhost:9999/api?key=kkk"
-kkk not exist
-*/
-
 import (
-	//"flag"
-	// "fmt"
-	// "log"
-	// "net/http"
-
+	"flag"
+	
 	"./tinycache"
 )
 
@@ -27,11 +17,25 @@ var (
 	}
 )
 
+var servers = map[string]string{
+	"0": "localhost:10000",	
+	"1": "localhost:10001",	
+	"2": "localhost:10002",	
+}
+
 func main() {
+	var peername string
+	flag.StringVar(&peername, "peername", "0", "the name of the peer")
+	flag.Parse()
+
+
 	var loader tinycache.Loader = func(key string) (string, error) {
 		return dbData[key], nil
 	}
 	tinycache.CreateCollection("scores", 1024, loader)
-	go tinycache.ServeRPC("localhost:8081")
-	tinycache.RegistPeer(dbName, "localhost:8081")
+
+	for name, addr := range servers {
+		tinycache.RegistPeer(name, addr)
+	}
+	tinycache.ServeRPC(peername, servers[peername])
 }
