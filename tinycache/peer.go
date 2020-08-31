@@ -2,57 +2,80 @@ package tinycache
 
 import (
 	"fmt"
+	"log"
 	"github.com/valyala/gorpc"
 )
 
 var dispatcher = gorpc.NewDispatcher()
 
 func init() {
-	dispatcher.AddFunc("Get", func (collectionName, key string) (string, LoadType, error) {
-		collection := GetCollection(collectionName)
+	dispatcher.AddFunc("Get", func (params *funcGetParams) (string, error) {
+		collection := GetCollection(params.CollectionName)
 		if collection == nil {
-			return "", 0, fmt.Errorf("collection not found")
+			return "", fmt.Errorf("collection not found")
 		}
-		value, lt, err := collection.Get(key)
-		if lt == FromLocalCache {
-			lt = FromRemoteCache
-		}
-		if lt == FromLocalLoader {
-			lt = FromRemoteLoader
-		}
-		return value, lt, err
+		return collection.Get(params.Key)
 	})
 }
 
-var peers = make(map[string]*peer)
+var peers = make(map[string]peer)
 
 //以后可以实现 gorpc mqtt http等多种形式的peer
 type peer interface {
-	name() string
-	addr() string
-	register(name, addr string)
-	get(collectionName, key string) (string, LoadType, error)
+	getName() string
+	getAddr() string
+	get(collectionName, key string) (string, error)
 }
 
 type gorpcPeer struct{
 	name string
-	addr 
+	addr string
+	cli *gorpc.Client
 }
 
+var _ peer = (*gorpcPeer)(nil)
 
-func (p *peer) get(collectionName, key string) (string, LoadType, error) {
-	resp, err := dispatcher.NewFuncClient(p.rpcCli).Call("Get", collectionName, key)
+func (p gorpcPeer) getName() string{
+	return p.name;
+}
+
+func (p gorpcPeer) getAddr() string {
+	return p.addr;
+}
+
+type funcGetParams struct {
+	CollectionName string
+	Key string
+}
+
+func (p *gorpcPeer) get(collectionName, key string) (string, error) {
+	params := &funcGetParams{collectionName, key}
+	res, err := dispatcher.NewFuncClient(p.cli).Call("Get", params)
+	log.Println("func get:",res, err)
+	return res.(string), err
 }
 
 // RegistPeer 注册存在的节点
 func RegistPeer(name string, addr string) {
 	cli := gorpc.NewTCPClient(addr)
 	cli.Start()
-	p := &peer{
-		name, 
-		addr, 
-		cli,
+	//有个问题，Start会不会掉，或者选择每次访问的时候Start()
+	p := &gorpcPeer{ name, addr, cli}
+	peers[name] = peer(p)
+
+	//test
+	value, _ := p.get("scores", "Tom")
+	log.Println("rpc response:", value)
+}
+
+//ServeRPC 启动RPC服务
+func ServeRPC(addr string) {	
+	s := &gorpc.Server{
+		Addr: addr,
+		Handler: dispatcher.NewHandlerFunc(),
 	}
-	peers[name] = p
+	if err := s.Serve(); err != nil {
+		log.Fatalf("Cannot start rpc server: %s", err)
+	}	
 }
 

@@ -20,11 +20,11 @@ func TestCase1(t *testing.T) {
 	}
 	c := CreateCollection("score", 10, loader)
 	key := "Tom"
-	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader {
-		t.Fatalf("res: %s, loadType: %d",res, lt );
+	if res, _ := c.Get(key); res != dbData[key] {
+		t.Fatalf("res: %s",res);
 	}
-	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalCache{
-		t.Fatalf("res: %s, loadType: %d",res, lt );
+	if res, _ := c.Get(key); res != dbData[key]{
+		t.Fatalf("res: %s",res);
 	}
 }
 
@@ -35,10 +35,10 @@ func TestCase2(t *testing.T) {
 	}
 	c := CreateCollection("score", 1, loader)
 	key := "Tom"
-	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader {
-		t.Fatalf("res: %s, loadType: %d",res, lt );
+	if res, _ := c.Get(key); res != dbData[key] {
+		t.Fatalf("res: %s",res);
 	}
-	if res, lt, _ := c.Get(key); res != dbData[key] || lt != FromLocalLoader{
-		t.Fatalf("res: %s, loadType: %d",res, lt );
+	if res, _ := c.Get(key); res != dbData[key]{
+		t.Fatalf("res: %s",res);
 	}
 }

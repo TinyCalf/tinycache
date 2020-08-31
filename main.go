@@ -9,9 +9,9 @@ kkk not exist
 
 import (
 	//"flag"
-	"fmt"
-	"log"
-	"net/http"
+	// "fmt"
+	// "log"
+	// "net/http"
 
 	"./tinycache"
 )
@@ -28,5 +28,10 @@ var (
 )
 
 func main() {
-	
+	var loader tinycache.Loader = func(key string) (string, error) {
+		return dbData[key], nil
+	}
+	tinycache.CreateCollection("scores", 1024, loader)
+	go tinycache.ServeRPC("localhost:8081")
+	tinycache.RegistPeer(dbName, "localhost:8081")
 }
