@@ -29,11 +29,13 @@ func startServer(peername string) {
 	for name, addr := range servers {
 		RegistPeer(name, addr)
 	}
+	
 	ServeRPC(peername, servers[peername])
 }
 
 func TestServer0(t *testing.T) {
 	log.Println("starting server 0")
+	go StartTerminal("localhost:9000")
 	startServer("0");
 }
 
