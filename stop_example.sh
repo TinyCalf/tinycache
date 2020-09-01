@@ -1,0 +1,1 @@
+ps aux | grep '[t]inycache.test' | awk '{print $2}' | xargs kill
